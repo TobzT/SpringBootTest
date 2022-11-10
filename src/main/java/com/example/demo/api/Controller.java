@@ -117,8 +117,11 @@ public class Controller {
             int dAge = next50 - totalAge2;
             if(dAge != next50) peopleLeft += dAge;
             if(peopleLeft < 0){
-                peopleLeft = persons.size() + peopleLeft;
-                x++;
+                while (peopleLeft < 0){
+                    peopleLeft = persons.size() + peopleLeft;
+                    x++;
+                }
+
             }
             totalAge2 = 0;
 
