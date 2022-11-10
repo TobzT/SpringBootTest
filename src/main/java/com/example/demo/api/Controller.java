@@ -109,22 +109,27 @@ public class Controller {
         Map<String, Map<String, Integer>> output = new HashMap<>();
         Map<String, Integer> test = new HashMap<>();
         String newDate = "";
+        int x = 0;
         // calculate new year
         while(totalAge2 != next50) {
             test.clear();
             output.clear();
             int dAge = next50 - totalAge2;
             if(dAge != next50) peopleLeft += dAge;
+            if(peopleLeft < 0){
+                peopleLeft = persons.size() + peopleLeft;
+                x++;
+            }
             totalAge2 = 0;
 
 
             int currentYear = Integer.parseInt(time.substring(6, 10));
-            int newYear = currentYear + fullYears + 1;
+            int newYear = currentYear + fullYears + 1 - x;
             String date;
             if (peopleLeft > 0) {
                 date = persons.get(peopleLeft - 1).getDobS();
             } else {
-                date = persons.get(persons.size() - 1).getDobS();
+                date = persons.get(0).getDobS();
             }
 
             String newMonth = date.substring(3, 5);
