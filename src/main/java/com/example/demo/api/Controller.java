@@ -104,7 +104,7 @@ public class Controller {
         float rest = years - fullYears;
 
         // get how many people need to have their birthday into the year
-        int peopleLeft = (int) Math.ceil((rest * persons.size())) + 1;
+        int peopleLeft = (int) Math.ceil((rest * persons.size()));
         int totalAge2 = 0;
         Map<String, Map<String, Integer>> output = new HashMap<>();
         Map<String, Integer> test = new HashMap<>();
@@ -113,11 +113,8 @@ public class Controller {
         while(totalAge2 != next50) {
             test.clear();
             output.clear();
-            if(totalAge2 > next50 || totalAge2 == 0) {
-                peopleLeft--;
-            } else {
-                peopleLeft++;
-            }
+            int dAge = next50 - totalAge2;
+            if(dAge != next50) peopleLeft += dAge;
             totalAge2 = 0;
 
 
