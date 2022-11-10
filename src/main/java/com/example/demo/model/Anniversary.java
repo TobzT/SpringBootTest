@@ -1,14 +1,15 @@
 package com.example.demo.model;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class Anniversary {
     private String date;
-    private HashMap<String, Integer> idk;
+    private Map<String, Integer> idk;
 
-    public Anniversary(String date, String[] idk) {
+    public Anniversary(String date, Map<String, Integer> idk) {
         this.date = date;
-        //TODO
+        this.idk = idk;
     }
 
 }

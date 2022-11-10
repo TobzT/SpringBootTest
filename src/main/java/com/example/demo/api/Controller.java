@@ -1,5 +1,6 @@
 package com.example.demo.api;
 
+import com.example.demo.model.Anniversary;
 import com.example.demo.model.Person;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +17,22 @@ public class Controller {
     List<Person> persons = new ArrayList<Person>();
 
     DateFormat dtf = new SimpleDateFormat("dd/MM/yyyy");
+
+    private static HashMap<Integer, Integer> months = new HashMap<>();
+    static {
+        months.put(1, 31);
+        months.put(2, 27);
+        months.put(3, 31);
+        months.put(4, 30);
+        months.put(5, 31);
+        months.put(6, 30);
+        months.put(7, 31);
+        months.put(8, 31);
+        months.put(9, 30);
+        months.put(10, 31);
+        months.put(11, 30);
+        months.put(12, 31);
+    }
 
     @PostMapping("persons")
     public void createPerson(@RequestParam(value="name", defaultValue="user") String name, @RequestParam(value="dob", defaultValue="01/01/2000") String dob) {
@@ -58,7 +75,7 @@ public class Controller {
     }
 
     @GetMapping("persons/anniversary")
-    public String getAnniversary() {
+    public Map<String, Map<String, Integer>> getAnniversary() {
         sortPersons();
         int totalAge = 0;
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -87,23 +104,64 @@ public class Controller {
         float rest = years - fullYears;
 
         // get how many people need to have their birthday into the year
-        int peopleLeft = (int) Math.ceil((rest * persons.size()));
-
+        int peopleLeft = (int) Math.ceil((rest * persons.size())) + 1;
+        int totalAge2 = 0;
+        Map<String, Map<String, Integer>> output = new HashMap<>();
+        Map<String, Integer> test = new HashMap<>();
+        String newDate = "";
         // calculate new year
-        int currentYear = Integer.parseInt(time.substring(6, 10));
-        int newYear = currentYear + fullYears;
-
-        String date = persons.get(peopleLeft - 1).getDobS();
-        String newMonth = date.substring(3, 5);
-        int newDay = Integer.parseInt(date.substring(0,2));
-        // TODO VALIDATION OF NEW MONTH
-
-        newDay += 1;
-
-        String newDate = format(Integer.toString(newDay)) + '/' + newMonth + '/' + newYear;
+        while(totalAge2 != next50) {
+            test.clear();
+            output.clear();
+            if(totalAge2 > next50 || totalAge2 == 0) {
+                peopleLeft--;
+            } else {
+                peopleLeft++;
+            }
+            totalAge2 = 0;
 
 
-        return newDate;
+            int currentYear = Integer.parseInt(time.substring(6, 10));
+            int newYear = currentYear + fullYears + 1;
+            String date;
+            if (peopleLeft > 0) {
+                date = persons.get(peopleLeft - 1).getDobS();
+            } else {
+                date = persons.get(persons.size() - 1).getDobS();
+            }
+
+            String newMonth = date.substring(3, 5);
+            int newDay = Integer.parseInt(date.substring(0,2));
+            newDay += 1;
+
+            // update month and year if necessary
+            if(newDay > months.get(Integer.parseInt(newMonth))) {
+                newDay = 1;
+                int a = Integer.parseInt(newMonth) + 1;
+                if(a > 12) {
+                    a = 1;
+                    newYear++;
+                }
+                newMonth = Integer.toString(a);
+            }
+
+
+            newDate = format(Integer.toString(newDay)) + '/' + format(newMonth) + '/' + newYear;
+
+//        test.put("next50", next50);
+
+
+            for(Person person: persons) {
+                int personAge = getAge(person.getDobS(), newDate);
+                totalAge2 += personAge;
+                test.put(person.getName(), personAge);
+            }
+        }
+
+
+        output.put(newDate, test);
+
+        return output;
     }
 
     private String format(String day) {
@@ -114,7 +172,7 @@ public class Controller {
     }
 
     private int getAge(String dob, String time) {
-        int dYear;
+        int age;
         int currentYear = Integer.parseInt(time.substring(6, 10));
         int currentMonth = Integer.parseInt(time.substring(3, 5));
         int currentDay = Integer.parseInt(time.substring(0, 2));
@@ -124,17 +182,17 @@ public class Controller {
         int birthDay = Integer.parseInt(dob.substring(0, 2));
 
         if (birthMonth > currentMonth) {
-            dYear = currentYear - birthYear - 1;
+            age = currentYear - birthYear   - 1;
         } else if(birthMonth == currentMonth) {
             if(birthDay > currentDay) {
-                dYear = currentYear - birthYear - 1;
+                age = currentYear - birthYear   - 1;
             } else {
-                dYear = currentYear - birthYear;
+                age = currentYear - birthYear;
             }
         } else {
-            dYear = currentYear - birthYear;
+            age = currentYear - birthYear;
         }
-        return dYear;
+        return age;
     }
 
     private void sortPersons() {
